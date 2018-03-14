@@ -9,8 +9,8 @@ var mongoose = require('mongoose');
 var db = require('./public/javascripts/models/db');
 var user = require('./public/javascripts/models/users');
 
-// var index = require('./routes/index');
-// var Users = require('./routes/users');
+var index = require('./routes/index');
+var Users = require('./routes/users');
 
 var app = express();
 
@@ -20,21 +20,22 @@ app.set('view engine', 'pug');
 
 
 //connect to mongodb
-mongoose.connect(keys.mongodb.dbURI, () =>{
+mongoose.connect(keys.mongodb.dbURI, () => {
 	console.log('connected to mongo!!!');
 });
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
-	extended:true}));
+	extended: true
+}));
 
-app.get('/',(req,res) => {
+app.get('/', (req, res) => {
 	res.send('got you bro');
-} );
-app.get('/user',(req, res) =>{
+});
+app.get('/user', (req, res) => {
 	console.log('getting the user');
 	user.find({})
-		.exec((err,user)=>{
-			if(err){
+		.exec((err, user) => {
+			if (err) {
 				res.send(err);
 			} else {
 				console.log(user);
@@ -42,22 +43,22 @@ app.get('/user',(req, res) =>{
 			}
 		});
 });
-app.get('user/:id',(req,res) =>{
+app.get('user/:id', (req, res) => {
 	console.log('find one user');
 	user.find({
-		_id:req.params.id
+		_id: req.params.id
 	})
-		.exce((err,user) =>{
-			if(err){
+		.exce((err, user) => {
+			if (err) {
 				console.log(err);
-			}else{
+			} else {
 				console.log(user);
 				res.json(user);
 			}
 		});
 });
 
-app.post('/user',(req,res)=>{
+app.post('/user', (req, res) => {
 
 	let newUser = new user();
 	newUser.email = req.body.email;
@@ -66,46 +67,60 @@ app.post('/user',(req,res)=>{
 	newUser.city = req.body.city;
 	newUser.state = req.body.state;
 	newUser.zipcode = req.body.zipcode;
-	newUser.save((err,book) =>{
-		if(err){
+	newUser.save((err, book) => {
+		if (err) {
 			console.log(err);
-		}else{
+		} else {
+			console.log(user);
+			res.send(user);
+		}
+	});
+});
+//
+app.post('/user2', (req, res) => {
+
+	user.create(req.body, (err, user) => {
+		if (err) {
+			console.log(err);
+			res.send(err);
+		} else {
 			console.log(user);
 			res.send(user);
 		}
 	});
 });
 
+app.put('/user/:id', ((req, res) => {
+	user.findOneAndUpdate({
+		_id: req.params.id
+	}, {
+		$set: req.body
+	},
 
+	{
+		upsert: true
+	}, ((err, newUser) => {
+			if (err) {
+				console.log(err);
+			} else {
+				console.log(newUser);
+				res.status(200).send(newUser);
+			}
+		}));
+}));
 
+app.delete('/user/:id', ((req, res) => {
+	user.deleteOne({
+		_id: req.params.id
+	}, ((err) => {
+			if (err) {
+				res.send(err);
+			} else {
 
+				res.sendStatus(204);
+			}
+		}));
+}));
 
-// app.use('/', index);
-// app.use('/users', users);
-
-
-
-
-
-// catch 404 and forward to error handler
-// app.use(function(req, res, next) {
-// 	var err = new Error('Not Found');
-// 	err.status = 404;
-// 	next(err);
-// });
-
-// error handler
-// app.use(function(err, req, res, next) {
-// 	// set locals, only providing error in development
-// 	res.locals.message = err.message;
-// 	res.locals.error = req.app.get('env') ===
-// 	'development' ? err : {};
-//
-// 	// render the error page
-// 	res.status(err.status || 500);
-// 	res.render('error');
-//
-//
-// });
 
 module.exports = app;
