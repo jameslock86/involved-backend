@@ -1,36 +1,37 @@
 var express = require('express');
 var app = express();
-var userRouter = express.Router();
+var Router = express.Router();
 
 // Require User model in our routes module
-var User = require('../models/User');
+var User = require('../public/javascripts/models/users');
 
 // Defined store route
-userRouter.route('/user/post').post(function (req, res) {
+Router.route('/user/post').post(function (req, res) {
+	console.log('this is req.body',req.body);
 	var user = new User(req.body);
 	user.save()
-		.then(user => {
+		.then(User => {
 			res.status(200).json({User: 'User added successfully'});
 		})
 		.catch(err => {
-			res.status(400).send('unable to save to database');
+			res.status(400).send('unable to save to database',err);
 		});
 });
 
 // Defined get data(index or listing) route
-userRouter.route('/').get(function (req, res) {
-	User.find(function (err, itms){
+Router.route('/').get(function (req, res) {
+	User.find(function (err, user){
 		if(err){
 			console.log(err);
 		}
 		else {
-			res.json(itms);
+			res.json(user);
 		}
 	});
 });
 
 // Defined edit route
-userRouter.route('/edit/:id').get(function (req, res) {
+Router.route('/put/:id').get(function (req, res) {
 	var id = req.params.id;
 	User.findById(id, function (err, user){
 		res.json(user);
@@ -38,7 +39,7 @@ userRouter.route('/edit/:id').get(function (req, res) {
 });
 
 //  Defined update route
-userRouter.route('/update/:id').post(function (req, res) {
+Router.route('/update/:id').post(function (req, res) {
 	User.findById(req.params.id, function(err, user) {
 		if (!user)
 			return next(new Error('Could not load Document'));
@@ -57,12 +58,12 @@ userRouter.route('/update/:id').post(function (req, res) {
 });
 
 // Defined delete | remove | destroy route
-userRouter.route('/delete/:id').get(function (req, res) {
+Router.route('/delete/:id').get(function (req, res) {
 	User.findByIdAndRemove({_id: req.params.id},
-	   function(err, user){
+	  function(err, user){
 			if(err) res.json(err);
 			else res.json('Successfully removed');
 		});
 });
 
-module.exports = userRouter;
+module.exports = Router;

@@ -8,11 +8,31 @@ var keys = require('./public/javascripts/keys');
 var mongoose = require('mongoose');
 var db = require('./public/javascripts/models/db');
 var user = require('./public/javascripts/models/users');
-
+var cors = require('cors');
 // var index = require('./routes/index');
-// var Users = require('./routes/users');
-
+var users = require('./routes/users');
 var app = express();
+app.use(cors());
+
+
+
+// Add headers
+app.use(function(req, res, next) {
+	res.header('Access-Control-Allow-Origin', '*');
+	res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+	next();
+});
+
+app.get('/', function(req, res, next) {
+	// Handle the get for this route
+});
+
+app.post('/', function(req, res, next) {
+	// Handle the post for this route
+});
+
+
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -24,9 +44,10 @@ mongoose.connect(keys.mongodb.dbURI, () => {
 	console.log('connected to mongo!!!');
 });
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({
-	extended: true
-}));
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(users);
+
+
 
 app.get('/', (req, res) => {
 	res.send('got you bro');
